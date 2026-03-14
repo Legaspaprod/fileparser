@@ -6,10 +6,10 @@
 namespace fs = std::filesystem;
 
 int main() {
-    std::string folder = "../car manager/";
+    std::string folder = "../car-manager/";
     std::ofstream output("result.txt");
 
-    for (const auto& entry : fs::directory_iterator(folder)) {
+    for (const auto& entry : fs::recursive_directory_iterator(folder)) {
 
         if (!entry.is_regular_file())
             continue;
@@ -28,4 +28,6 @@ int main() {
             output << "\n";
         }
     }
+
+    std::cout << "Выполнено!\n";
 }
