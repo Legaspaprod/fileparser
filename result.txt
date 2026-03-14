@@ -1,0 +1,327 @@
+=== src/car_manager.cpp ===
+
+1: #include <iostream>
+2: #include <algorithm>
+3: #include <fstream>
+4: #include "car_manager.h"
+5: 
+6: std::vector<Car>::iterator CarManager::findCarIterator(const std::string& brand)
+7: {
+8:     return std::find_if(
+9:         cars.begin(),
+10:         cars.end(),
+11:         [brand](const Car& car) {
+12:             return car.brand == brand;
+13:         }
+14:     );
+15: }
+16: 
+17: void CarManager::findByPrice() {
+18:     std::cout << "Введите минимальную цену: \n";
+19:     int min{};
+20:     std::cin >> min;
+21:     std::cout << "Введите максимальную цену: \n";
+22:     int max{};
+23:     std::cin >> max;
+24: }
+25: 
+26: void CarManager::sortByPriceDescending() {
+27:     std::sort(cars.begin(), cars.end(), [](const Car& a, const Car&b) {
+28:             return a.price > b.price;
+29:         } 
+30:     );
+31:     
+32:     std::cout << "Отсортировано.\n";    
+33: }
+34: 
+35: void CarManager::sortByPrice() {
+36:     std::sort(cars.begin(), cars.end(), [](const Car& a, const Car&b) {
+37:             return a.price < b.price;
+38:         } 
+39:     ); 
+40:     
+41:     std::cout << "Отсортировано.\n";
+42: }
+43: 
+44: void CarManager::saveToFile() {
+45: 
+46:     std::ofstream output("data/carbase.txt");
+47:     if (!output) {
+48:         std::cout << "Ошибка открытия файла\n";
+49:         return;
+50:     }
+51: 
+52:     for (const auto& car : cars) {
+53:         output  << car.id << " "
+54:                 << car.brand << " "
+55:                 << car.model << " "
+56:                 << car.year << " "
+57:                 << car.price << "\n";
+58:     }
+59: }
+60: 
+61: void CarManager::loadFromFile() {
+62:     cars.clear();
+63:     
+64:     std::ifstream input("data/carbase.txt");
+65: 
+66:     if (!input) {
+67:         std::cout << "Файл базы не найден\n";
+68:         return;
+69:     }
+70: 
+71:     Car car;
+72: 
+73:     while (input >> car.id >>car.brand >> car.model >> car.year >> car.price) {
+74:         cars.push_back(car);
+75:     }
+76:     nextid = car.id + 1;
+77: }
+78: 
+79: void CarManager::removeCarByBrand() {
+80:     std::string brand;
+81: 
+82:     std::cout << "Введите бренд: \n";
+83:     std::cin >> brand;
+84: 
+85:     auto it = findCarIterator(brand);
+86: 
+87:     if (it != cars.end()) {
+88:         cars.erase(it);
+89:         std::cout << "Машина " << brand << " удалена!\n";
+90:     } else {
+91:         std::cout << "Машина не найдена!\n";
+92:     }
+93: }
+94: 
+95: void CarManager::findCarByBrand() const {
+96:     std::string brand;
+97: 
+98:     std::cout << "Введите бренд: \n";
+99:     std::cin >> brand;
+100: 
+101:     auto it = std::find_if(cars.begin(), cars.end(), [brand](const Car& car) {
+102:         return car.brand == brand;
+103:         }
+104:     );
+105: 
+106:     if (it != cars.end()) {
+107:         std::cout   << "Найдена машина: "
+108:                     << it->brand << " "
+109:                     << it->model << " "
+110:                     << it->price << "$\n";
+111:     } else {
+112:         std::cout << "Машина не найдена!\n";
+113:     }
+114: }
+115: 
+116: void CarManager::addCar() {
+117:         Car newCar;
+118: 
+119:         std::cout << "Введите бренд: ";
+120:         std::cin >> newCar.brand;
+121: 
+122:         std::cout << "Введите модель: ";
+123:         std::cin >> newCar.model;
+124: 
+125:         std::cout << "Введите год: ";
+126:         int year;
+127:         while (true) {
+128:             if (!(std::cin >> year)) {
+129:                 std::cout << "Ошибка, вводите только цифры!\n";
+130: 
+131:                 std::cin.clear();
+132:                 std::cin.ignore(10000, '\n');
+133:                 std::cout << "Введите цену: ";
+134:             } else {
+135:                 break;
+136:             }
+137:         }
+138:         newCar.year = year;
+139: 
+140:         std::cout << "Введите цену: ";
+141:         int prices{};
+142:         while (true) {
+143:             if (!(std::cin >> prices)) {
+144:                 std::cout << "Ошибка, вводите только цифры!\n";
+145: 
+146:                 std::cin.clear();
+147:                 std::cin.ignore(10000, '\n');
+148:                 std::cout << "Введите цену: ";
+149:             } else {
+150:                 break;
+151:             }
+152:         }
+153:         newCar.price = prices;
+154:         
+155:         newCar.id = nextid++;
+156:         cars.push_back(newCar);
+157: 
+158:         std::cout << "\nМашина добавлена!\n";
+159: 
+160: }
+161: 
+162: void CarManager::showCars() const {
+163: 
+164:         if (cars.empty()) {
+165:             std::cout << "Список машин пуст! \n";
+166:             return;
+167:         }
+168: 
+169:         std::cout   << "\nСписок машин:\n"
+170:                     << "№  |ID |    Марка    |  Модель  | Год | Цена \n"
+171:                     << "---------------------------------------------\n";
+172: 
+173:         int index = 1;
+174: 
+175:         for (const auto& car : cars) {
+176:             std::cout   << index++ << ". "
+177:                         << car.id << " "
+178:                         << car.brand << " "
+179:                         << car.model << " "
+180:                         << car.year << " Цена: "
+181:                         << car.price << " руб.\n";
+182: }
+183: 
+184:         std::cout << "Всего машин: " << cars.size() << "\n\n";    
+185: }
+
+
+=== src/main.cpp ===
+
+1: #include <iostream>
+2: #include "car_manager.h"
+3: 
+4: int main() {
+5: 
+6:     CarManager manager;
+7: 
+8:     manager.loadFromFile();
+9: 
+10:     int choice;
+11: 
+12:     while (true) {
+13:         std::cout   << "==========Car Manager v1.0==========\n"
+14:                     << "1. Добавить машину\n"
+15:                     << "2. Показать машины\n"
+16:                     << "3. Найти машину\n"
+17:                     << "4. Удалить машину\n"
+18:                     << "5. Сохранить\n"
+19:                     << "6. Загрузить\n"
+20:                     << "7. Сортировать по цене\n"
+21:                     << "8. Выход\n"
+22:                     << "Выбор: ";
+23:         
+24:         std::cin >> choice;
+25: 
+26:         if (choice == 1) {
+27:             manager.addCar();
+28:         } else if (choice == 2) {
+29:             manager.showCars();
+30:         } else if (choice == 3) {
+31:             while (true) {
+32:                 std::cout   << "1. Найти по бренду\n"
+33:                             << "2. Найти по цене\n"
+34:                             << "3. Назад\n";
+35:                 
+36:                 std::cin >> choice;
+37:                 
+38:                 if (choice == 1) {
+39:                     manager.findCarByBrand();
+40:                 } else if (choice == 2) {
+41:                     
+42:                 } else if (choice == 3) {
+43:                     break;
+44:                 }
+45:             }
+46:         } else if (choice == 4) {
+47:             manager.removeCarByBrand();
+48:         } else if (choice == 5) {
+49:             manager.saveToFile();
+50:         } else if (choice == 6) {
+51:             manager.loadFromFile();
+52:         } else if (choice == 7) {
+53:             while (true) {
+54:                 std::cout   << "1. Сортировать по возрастанию\n"
+55:                             << "2. Сортировать по убыванию\n"
+56:                             << "3. Назад\n"
+57:                             << "Выбор: ";
+58: 
+59:                 std::cin >> choice;
+60: 
+61:                 if (choice == 1) {
+62:                     manager.sortByPrice();
+63:                     break;
+64:                 } else if (choice == 2) {
+65:                     manager.sortByPriceDescending();
+66:                     break;
+67:                 } else if (choice == 3) {
+68:                     break;
+69:                 }
+70:             }
+71:         } else if (choice == 8) {
+72:             manager.saveToFile();
+73:             std::cout << "Выход из программы. \n";
+74:             break;
+75:         } else {
+76:             std::cout << "Выберете число от 1 до 8.\n";
+77:             std::cin.clear();
+78:             std::cin.ignore(10000, '\n');
+79:         }
+80:     }
+81: 
+82:     return 0;
+83: }
+
+
+=== include/car_manager.h ===
+
+1: #ifndef CAR_MANAGER_H
+2: #define CAR_MANAGER_H
+3: 
+4: #include <vector>
+5: #include "car.h"
+6: 
+7: class CarManager
+8: {
+9: private:
+10:     std::vector<Car> cars;
+11:     int nextid = 1;
+12: 
+13:     std::vector<Car>::iterator findCarIterator(const std::string& brand);
+14: 
+15: public:
+16:     void addCar();
+17:     void showCars() const;
+18:     void findCarByBrand() const;
+19:     void removeCarByBrand();
+20:     void saveToFile();
+21:     void loadFromFile();
+22:     void sortByPrice();
+23:     void sortByPriceDescending();
+24:     void findByPrice();
+25: };
+26: 
+27: 
+28: 
+29: #endif
+
+
+=== include/car.h ===
+
+1: #ifndef CAR_H
+2: #define CAR_H
+3: 
+4: #include <string>
+5: 
+6: struct Car {
+7:     int id;
+8:     std::string brand;
+9:     std::string model;
+10:     int year;
+11:     int price{};
+12: };
+13: 
+14: #endif
+
+
